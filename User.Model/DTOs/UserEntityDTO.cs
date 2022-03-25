@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace User.Model.DTOs
 {
+    /// <summary>
+    /// DTO to represent an user
+    /// </summary>
     public class UserEntityDTO
     {
         [Required]

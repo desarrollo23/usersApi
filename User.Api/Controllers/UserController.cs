@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +11,9 @@ using User.Model.Interfaces.Engine;
 
 namespace User.Api.Controllers
 {
+    /// <summary>
+    /// Controller to manage users
+    /// </summary>
     [Route("api/users")]
     [ApiController]
     public class UserController : ControllerBase
@@ -20,6 +25,11 @@ namespace User.Api.Controllers
             _userEngine = userEngine;
         }
 
+        /// <summary>
+        /// Create a new user
+        /// </summary>
+        /// <param name="userEntityDTO">User request</param>
+        /// <returns>Response of type EntityResponse</returns>
         [HttpPost]
         public ActionResult<EntityResponse> Create([FromBody]UserEntityDTO userEntityDTO)
         {
@@ -32,6 +42,14 @@ namespace User.Api.Controllers
         public ActionResult<EntityResponse> Get()
         {
             var response = _userEngine.GetUsers();
+            return response;
+        }
+
+        [HttpGet("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public ActionResult<EntityResponse> GetById(int id)
+        {
+            var response = _userEngine.GetUserById(id);
             return response;
         }
 

@@ -39,6 +39,22 @@ namespace User.Engine
 
         }
 
+        public EntityResponse CreateList(List<UserEntityDTO> userEntities)
+        {
+            try
+            {
+                var users = _mapper.Map<List<UserEntity>>(userEntities);
+                _userRepository.AddRange(users);
+
+                return EntityResponse.Create(System.Net.HttpStatusCode.Created);
+
+            }
+            catch (Exception ex)
+            {
+                return EntityResponse.Create(System.Net.HttpStatusCode.InternalServerError, null, ex.Message);
+            }
+        }
+
         public EntityResponse GetUserById(int id)
         {
             try
