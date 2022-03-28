@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +17,16 @@ namespace User.Engine
     {
         private readonly IUserRepository _userRepository;
         private IMapper _mapper;
+        private IConfiguration _config;
 
-        public UserEngine(IUserRepository userRepository, IMapper mapper)
+        public UserEngine(
+            IUserRepository userRepository, 
+            IMapper mapper, 
+            IConfiguration config)
         {
             _userRepository = userRepository;
             _mapper = mapper;
+            _config = config;
         }
 
         public EntityResponse Create(UserEntityDTO userDTO)
@@ -73,11 +79,16 @@ namespace User.Engine
             }
         }
 
-        public EntityResponse GetUsers()
+        public EntityResponse GetUsers(int pageNumber)
         {
             try
             {
-                var users = _userRepository.FindAll().Skip(5).Take(5);
+                int numberPerPage = int.Parse(_config["ApiConfigParams:resultsPerPage"]);
+
+                var users = _userRepository.FindAll()
+                    .Skip(numberPerPage * (pageNumber - 1))
+                    .Take(numberPerPage);
+
                 return EntityResponse.Create(System.Net.HttpStatusCode.OK, users);
             }
             catch (Exception ex)

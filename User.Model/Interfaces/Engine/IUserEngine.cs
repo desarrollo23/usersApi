@@ -11,7 +11,7 @@ namespace User.Model.Interfaces.Engine
 
         EntityResponse CreateList(List<UserEntityDTO> userEntities);
 
-        EntityResponse GetUsers();
+        EntityResponse GetUsers(int pageNumber);
 
         EntityResponse GetUserById(int id);
 

@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -21,6 +22,7 @@ using User.Infraestructure.Base.Context;
 using User.Infraestructure.Repos.Engine;
 using User.Model.Interfaces.Engine;
 using User.Model.Interfaces.Repos;
+using User.Model.Mappers;
 using User.Service.User;
 
 namespace User.Api
@@ -42,7 +44,13 @@ namespace User.Api
             services.AddTransient<IUserEngine, UserEngine>();
             services.AddTransient<ISecurityEngine, SecurityEngine>();
 
-            services.AddAutoMapper(typeof(Startup));
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new AutoMapperProfiles());
+            });
+
+            IMapper mapper = mapperConfig.CreateMapper();
+            services.AddSingleton(mapper);
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opt => {

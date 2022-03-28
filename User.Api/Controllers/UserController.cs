@@ -38,10 +38,10 @@ namespace User.Api.Controllers
             return response;
         }
 
-        [HttpGet]
-        public ActionResult<EntityResponse> Get()
+        [HttpGet("list/{pageNumber}")]
+        public ActionResult<EntityResponse> Get(int pageNumber = 1)
         {
-            var response = _userEngine.GetUsers();
+            var response = _userEngine.GetUsers(pageNumber);
             return response;
         }
 

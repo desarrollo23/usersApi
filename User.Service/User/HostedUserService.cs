@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -46,7 +47,11 @@ namespace User.Service.User
         {
             using var httpClient = new HttpClient();
 
-            using var response = await httpClient.GetAsync($"https://reqres.in/api/users?page={pageNumber}");
+            using var scope = _scopeFactory.CreateScope();
+            var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+            var url_api = config["ApiConfigParams:apiUrlUsers"];
+
+            using var response = await httpClient.GetAsync($"{url_api}?page={pageNumber}");
             string apiResponse = await response.Content.ReadAsStringAsync();
 
             HttpApiResponse httpApiResponse = JsonConvert.DeserializeObject<HttpApiResponse>(apiResponse);
@@ -59,15 +64,16 @@ namespace User.Service.User
             try
             {
                 var users = MapUsers(userEntities);
+                var usersToAdd = ValidateUserExists(users);
 
                 using var scope = _scopeFactory.CreateScope();
                 var dbContext = scope.ServiceProvider.GetRequiredService<UserContext>();
-                dbContext.Users.AddRange(users);
+                dbContext.Users.AddRange(usersToAdd);
                 dbContext.SaveChanges();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                
+                throw ex;
             }
         }
 
@@ -103,6 +109,24 @@ namespace User.Service.User
             });
 
             return users;
+        }
+
+        private List<UserEntity> ValidateUserExists(List<UserEntity> userEntities)
+        {
+            var newUsersList = new List<UserEntity>();
+
+            using var scope = _scopeFactory.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<UserContext>();
+
+            foreach (var user in userEntities)
+            {
+                var userRetrieved = dbContext.Users.FirstOrDefault(x => x.Email == user.Email);
+
+                if (userRetrieved == null)
+                    newUsersList.Add(user);
+            }
+
+            return newUsersList;
         }
     }
 }
